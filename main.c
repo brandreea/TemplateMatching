@@ -217,7 +217,7 @@ void coloreaza(struct pixel **imagine, unsigned long int Iinceput, unsigned long
 }
 
 //functie care primeste o imagine, un sablon si vector de detectii si adauga la acesta fiecare detectie a sablonului dat, cu un Cross-Corelation mai mare de 0.5
-void matchSablon(char *calefisier,struct pixel **img, unsigned long int lungime, unsigned long int latime,unsigned int nrSablon, struct detectii **d,unsigned long int *nDetect)
+void detectareSablon(char *calefisier,struct pixel **img, unsigned long int lungime, unsigned long int latime,unsigned int nrSablon, struct detectii **d,unsigned long int *nDetect)
 {
     unsigned int i,j,k1,k2;
     unsigned long int luSablon,laSablon,nSablon,nDet=(*nDetect);
@@ -403,7 +403,7 @@ void templateMatching(struct pixel **img, struct pixel **imgnoua, unsigned long 
         calefisier[strlen(calefisier)-1]='\0';
         printf("Va rugam asteptati...\n");
         //efectuez operatia de template-matching, retinand detectiile
-        matchSablon(calefisier,img,lungime,latime,i,&det,&nrDetectii);
+        detectareSablon(calefisier,img,lungime,latime,i,&det,&nrDetectii);
     }
     //sortam descrescaor
     qsort(det, nrDetectii,sizeof(struct detectii),comparator);
