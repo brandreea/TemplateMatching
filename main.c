@@ -158,7 +158,7 @@ void greyscale(struct pixel **img, unsigned long int lungime, unsigned long int 
 
         }
 }
-//aceasta este o functie ce, pentru un sablon dat, calculeaza deviatia standard si
+//aceasta este o functie ce, pentru un sablon dat, calculeaza deviatia standard
 double DeviatiaStandardSablon(struct pixel **sablon, unsigned long int luSablon, unsigned long int laSablon, double *Sb)
 {
     unsigned long int nSablon=0,i,j;
@@ -174,7 +174,7 @@ double DeviatiaStandardSablon(struct pixel **sablon, unsigned long int luSablon,
             Sbar=Sbar+c;
         }
     Sbar=(double)Sbar/nSablon;
-    //deviatia standard S
+    
 
     for(i=0; i<luSablon; i++)
         for(j=0; j<laSablon; j++)
@@ -189,7 +189,7 @@ double DeviatiaStandardSablon(struct pixel **sablon, unsigned long int luSablon,
     (*Sb)=Sbar;
     return DevStandardS;
 }
-//functie ce primeste o imagine, colturile stanga sus si dreapta jos ale unei ferestre in aceasta, o culoare si efectueaza colorarea unei rame in jurul acesteia
+//functie ce primeste o imagine, colturile stanga-sus si dreapta-jos ale unei ferestre in aceasta, o culoare si efectueaza colorarea unei rame in jurul acesteia
 void coloreaza(struct pixel **imagine, unsigned long int Iinceput, unsigned long int Isfarsit, unsigned long int Jinceput, unsigned long int Jsfarsit,struct pixel culoare)
 {
     int i,j;
@@ -261,7 +261,6 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
                     fIbar=fIbar+c;
                 }
             fIbar=(double)fIbar/nSablon;
-            //printf("%lf ", fIbar);
             for(i=k1; i<k1+luSablon; i++)
                 for(j=k2; j<k2+laSablon; j++)
                 {
@@ -283,7 +282,6 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
                     DevSTandardTotal=DevSTandardTotal+produs;
                 }
             DevSTandardTotal=(double) DevSTandardTotal/nSablon;
-            //printf("%lf ", DevSTandardTotal);
             if(DevSTandardTotal>=0.5)
             {
                 struct detectii aux;
@@ -297,9 +295,7 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
                 aux.cc=DevSTandardTotal;
                 aux.cifra=nrSablon;
                 (*d)[nDet-1]=aux;
-                //coloreaza(imgnoua,k1,k1+luSablon,k2,k2+laSablon,culoare);
-                //printf("%f ", aux.cc);
-
+            
             }
 
         }
@@ -314,7 +310,7 @@ int comparator(const void *p,const void *q)
     double r=((struct detectii*)q)->cc;
     return (-1)*(l*100-r*100);
 }
-//fubctie ce verifica gradul de suprapunere a oua ferestre
+//functie ce verifica gradul de suprapunere a doua ferestre
 double SuprapunFerestre(struct detectii x, struct detectii y)
 {
     //ariile celor 2 si a intersectiei
@@ -337,7 +333,6 @@ double SuprapunFerestre(struct detectii x, struct detectii y)
     {
         Axcapy=(dreapta-stanga)*(jos-sus);
         Axcupy=Axcapy/(double)(Ax+Ay-Axcapy);
-        //printf("%lf ",Axcupy);
         return Axcupy;
     }
     //daca nu exista, returnez -1
@@ -352,12 +347,12 @@ void EliminNonMaximele(struct detectii *det, unsigned long int *nr )
     double prag=0.2;
     for(i=0; i<nrDetectii-1; i++)
     {
-        //daca fereastra curenta nu "a fost" streasta
+        //daca fereastra curenta nu a fost marcata
         if(det[i].cc!=-1)
             //comparam cu toate celelalte
             for(j=i+1; j<nrDetectii; j++)
             {
-                //daca fereastra de comparatie nu a fost stearsa
+                //daca fereastra de comparatie nu a fost marcata
                 if(det[j].cc!=-1)
                     //daca suprapunerea este suficient de mare
                     if(SuprapunFerestre(det[i],det[j])>=prag)
@@ -382,13 +377,12 @@ void EliminNonMaximele(struct detectii *det, unsigned long int *nr )
     (*nr)=nrDetectii;
 
 }
-//functie ce primeste imaginea de pixeli, o copie a sa, dimensiunile sale si efectueaza operatia de template matching pentru un ste de sabloane
+//functie ce primeste imaginea de pixeli, o copie a sa, dimensiunile sale si efectueaza operatia de template matching pentru un set de sabloane
 void Template_Matching(struct pixel **img, struct pixel **imgnoua, unsigned long int lungime, unsigned long int latime)
 {
     struct detectii *det;
     det=NULL;
     unsigned long int nrDetectii=0;
-    //identific cifrele
     //citesc nr de sabloane
     printf("Introduceti numarul de sabloane pe care doriti sa le folositi (insa nu mai mult de 10) :");
     unsigned int nrSabloane=3,i;
@@ -399,7 +393,6 @@ void Template_Matching(struct pixel **img, struct pixel **imgnoua, unsigned long
     for(i=0; i<nrSabloane; i++)
         //citesc calea sablonului
     {   printf("Introduceti calea sablonului %u:", i);
-        //scanf("%s", calefisier);
         fgets(calefisier, 220, stdin);
         calefisier[strlen(calefisier)-1]='\0';
         printf("Va rugam asteptati...\n");
@@ -412,7 +405,6 @@ void Template_Matching(struct pixel **img, struct pixel **imgnoua, unsigned long
     //eliminam non-maximele
     if(nrDetectii!=0)
     EliminNonMaximele(det,&nrDetectii);
-   // printf("\n%lu \n", nrDetectii);
 
     //initializarea culorilor pentru fiecare sablon in parte
     struct pixel *culori=(struct pixel *)malloc(10*sizeof(struct pixel));
