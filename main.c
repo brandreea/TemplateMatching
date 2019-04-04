@@ -6,6 +6,7 @@
 //                      numarul de sabloane(maxim 10);
 //                      caile sabloanelor.
 //Datele vor fi citite de la tastatura.
+//Este important de mentionat ca, pentru acest proiect, dimensiunea cifrelor din sabloane si a celor din imaginea de test sa fie similare (de exemplu, daca un sablon este de 10x15 pixeli, se recomanda ca cifrele din imaginea test sa poata fi incadrate intr-o fereastra de 10x15, altfel acestea nu vor fi identificate corect).
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
