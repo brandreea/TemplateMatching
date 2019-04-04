@@ -27,7 +27,7 @@ typedef struct detectii
 
 //functie pentru citirea Header-ului imaginii
 //functia primeste un pointer catre un fisier BitMap si, prin intermediul celorlalti parametri, va transmite headerul alocat dinamic, dar si dimensiunile imaginii dupa cum reies din acesta.
-void citesc_header(FILE * f,unsigned char **header, unsigned long int *lung, unsigned long int *lat)
+void citescHeader(FILE * f,unsigned char **header, unsigned long int *lung, unsigned long int *lat)
 {
     unsigned char h;
     int i;
@@ -48,7 +48,7 @@ void citesc_header(FILE * f,unsigned char **header, unsigned long int *lung, uns
     fread(&latime,4,1,f);
     fread(&lungime,4,1,f);
 
-    //reveire pentru a adauga toti octetii in header (inclusiv dimensiunile)
+    //revenire pentru a adauga toti octetii in header (inclusiv dimensiunile)
     fseek(f,-8,SEEK_CUR);
 
     for(i=18; i<54; i++)
@@ -63,7 +63,7 @@ void citesc_header(FILE * f,unsigned char **header, unsigned long int *lung, uns
 
 }
 //functie ce aloca dinamic o matrice de pixeli
-void matrice_pixeli_neliniarizata(struct pixel ***pix, unsigned long int lungime, unsigned long int latime )
+void matricePixeliNeliniarizata(struct pixel ***pix, unsigned long int lungime, unsigned long int latime )
 {
     (*pix)=(struct pixel **)malloc(sizeof(struct pixel*)*lungime);
     int i;
@@ -72,7 +72,7 @@ void matrice_pixeli_neliniarizata(struct pixel ***pix, unsigned long int lungime
 
 }
 //functie ce citeste un tablou de pixeli si il converteste la o marice
-void citire_pixel(FILE *fin, struct pixel **img, unsigned long int lungime, unsigned long int latime)
+void citirePixel(FILE *fin, struct pixel **img, unsigned long int lungime, unsigned long int latime)
 {
     // sarim peste header
     fseek(fin,0,SEEK_SET);
@@ -104,7 +104,7 @@ void citire_pixel(FILE *fin, struct pixel **img, unsigned long int lungime, unsi
 
     fclose(fin);
 }
-//afisarea unei imagini stocata ca matrice de pixeli
+//afisarea unei imagini stocate ca matrice de pixeli
 void afisare(char *calefisier,unsigned char *header, struct pixel **img, unsigned long int lungime, unsigned long int latime)
 {
     FILE *fout=fopen(calefisier, "wb");
@@ -139,7 +139,7 @@ void afisare(char *calefisier,unsigned char *header, struct pixel **img, unsigne
 
 }
 //functie ce converteste o imagine data la greyscale(alb-negru)
-void greyscale(struct pixel **img, unsigned long int lungime, unsigned long int latime)
+void greyScale(struct pixel **img, unsigned long int lungime, unsigned long int latime)
 {
     int i,j;
     unsigned int g;
@@ -158,8 +158,8 @@ void greyscale(struct pixel **img, unsigned long int lungime, unsigned long int 
 
         }
 }
-//aceasta este o functie ce, pentru un sablon dat, calculeaza deviatia standard
-double DeviatiaStandardSablon(struct pixel **sablon, unsigned long int luSablon, unsigned long int laSablon, double *Sb)
+//aceasta este o functie ce, pentru un sablon dat, calculeaza deviatia standard si
+double deviatiaStandardSablon(struct pixel **sablon, unsigned long int luSablon, unsigned long int laSablon, double *Sb)
 {
     unsigned long int nSablon=0,i,j;
     nSablon=luSablon*laSablon;
@@ -174,7 +174,6 @@ double DeviatiaStandardSablon(struct pixel **sablon, unsigned long int luSablon,
             Sbar=Sbar+c;
         }
     Sbar=(double)Sbar/nSablon;
-    
 
     for(i=0; i<luSablon; i++)
         for(j=0; j<laSablon; j++)
@@ -218,7 +217,7 @@ void coloreaza(struct pixel **imagine, unsigned long int Iinceput, unsigned long
 }
 
 //functie care primeste o imagine, un sablon si vector de detectii si adauga la acesta fiecare detectie a sablonului dat, cu un Cross-Corelation mai mare de 0.5
-void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime, unsigned long int latime,unsigned int nrSablon, struct detectii **d,unsigned long int *nDetect)
+void matchSablon(char *calefisier,struct pixel **img, unsigned long int lungime, unsigned long int latime,unsigned int nrSablon, struct detectii **d,unsigned long int *nDetect)
 {
     unsigned int i,j,k1,k2;
     unsigned long int luSablon,laSablon,nSablon,nDet=(*nDetect);
@@ -236,17 +235,17 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
     unsigned char *header;
     double Sbar=0;
     //citesc sablon
-    citesc_header(f0,&header,&luSablon,&laSablon);
-    matrice_pixeli_neliniarizata(&cifra0,luSablon,laSablon);
-    citire_pixel(f0,cifra0,luSablon,laSablon);
+    citescHeader(f0,&header,&luSablon,&laSablon);
+    matricePixeliNeliniarizata(&cifra0,luSablon,laSablon);
+    citirePixel(f0,cifra0,luSablon,laSablon);
 
     //sablonul devine greyscale
-    greyscale(cifra0,luSablon,laSablon);
+    greyScale(cifra0,luSablon,laSablon);
     //dimensiune sablon
     nSablon=luSablon*laSablon;
     double DevStandardS=0;
     //deviatia standard a sablonului
-    DevStandardS=DeviatiaStandardSablon(cifra0,luSablon,laSablon,&Sbar);
+    DevStandardS=deviatiaStandardSablon(cifra0,luSablon,laSablon,&Sbar);
 
     //mai departe, se calculeaza Cross-Correlation dupa algoritmul standar (vezi https://en.wikipedia.org/wiki/Cross-correlation)
     for(k1=0; k1<lungime-luSablon; k1++)
@@ -261,6 +260,7 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
                     fIbar=fIbar+c;
                 }
             fIbar=(double)fIbar/nSablon;
+            //printf("%lf ", fIbar);
             for(i=k1; i<k1+luSablon; i++)
                 for(j=k2; j<k2+laSablon; j++)
                 {
@@ -282,6 +282,7 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
                     DevSTandardTotal=DevSTandardTotal+produs;
                 }
             DevSTandardTotal=(double) DevSTandardTotal/nSablon;
+            //printf("%lf ", DevSTandardTotal);
             if(DevSTandardTotal>=0.5)
             {
                 struct detectii aux;
@@ -295,7 +296,9 @@ void MatchSablon(char *calefisier,struct pixel **img, unsigned long int lungime,
                 aux.cc=DevSTandardTotal;
                 aux.cifra=nrSablon;
                 (*d)[nDet-1]=aux;
-            
+                //coloreaza(imgnoua,k1,k1+luSablon,k2,k2+laSablon,culoare);
+                //printf("%f ", aux.cc);
+
             }
 
         }
@@ -310,8 +313,8 @@ int comparator(const void *p,const void *q)
     double r=((struct detectii*)q)->cc;
     return (-1)*(l*100-r*100);
 }
-//functie ce verifica gradul de suprapunere a doua ferestre
-double SuprapunFerestre(struct detectii x, struct detectii y)
+//fubctie ce verifica gradul de suprapunere a oua ferestre
+double suprapunFerestre(struct detectii x, struct detectii y)
 {
     //ariile celor 2 si a intersectiei
     double Ax,Ay,Axcapy=0, Axcupy=0;
@@ -333,6 +336,7 @@ double SuprapunFerestre(struct detectii x, struct detectii y)
     {
         Axcapy=(dreapta-stanga)*(jos-sus);
         Axcupy=Axcapy/(double)(Ax+Ay-Axcapy);
+        //printf("%lf ",Axcupy);
         return Axcupy;
     }
     //daca nu exista, returnez -1
@@ -340,22 +344,22 @@ double SuprapunFerestre(struct detectii x, struct detectii y)
 
 }
 //functie de eliminare a non-maximele: primeste un vector sortat conform campului cc; dintre un grup de ferestre ce se vor suprapune, se patreaza doar cele cu cc cel mai mare
-void EliminNonMaximele(struct detectii *det, unsigned long int *nr )
+void eliminNonMaximele(struct detectii *det, unsigned long int *nr )
 {
     unsigned long int i,j,nrDetectii=(*nr),k=0;
     //setam un prag de suprapunere
     double prag=0.2;
     for(i=0; i<nrDetectii-1; i++)
     {
-        //daca fereastra curenta nu a fost marcata
+        //daca fereastra curenta nu "a fost" streasta
         if(det[i].cc!=-1)
             //comparam cu toate celelalte
             for(j=i+1; j<nrDetectii; j++)
             {
-                //daca fereastra de comparatie nu a fost marcata
+                //daca fereastra de comparatie nu a fost stearsa
                 if(det[j].cc!=-1)
                     //daca suprapunerea este suficient de mare
-                    if(SuprapunFerestre(det[i],det[j])>=prag)
+                    if(suprapunFerestre(det[i],det[j])>=prag)
 
                       det[j].cc=-1;
 
@@ -377,12 +381,13 @@ void EliminNonMaximele(struct detectii *det, unsigned long int *nr )
     (*nr)=nrDetectii;
 
 }
-//functie ce primeste imaginea de pixeli, o copie a sa, dimensiunile sale si efectueaza operatia de template matching pentru un set de sabloane
-void Template_Matching(struct pixel **img, struct pixel **imgnoua, unsigned long int lungime, unsigned long int latime)
+//functie ce primeste imaginea de pixeli, o copie a sa, dimensiunile sale si efectueaza operatia de template matching pentru un ste de sabloane
+void templateMatching(struct pixel **img, struct pixel **imgnoua, unsigned long int lungime, unsigned long int latime)
 {
     struct detectii *det;
     det=NULL;
     unsigned long int nrDetectii=0;
+    //identific cifrele
     //citesc nr de sabloane
     printf("Introduceti numarul de sabloane pe care doriti sa le folositi (insa nu mai mult de 10) :");
     unsigned int nrSabloane=3,i;
@@ -393,18 +398,20 @@ void Template_Matching(struct pixel **img, struct pixel **imgnoua, unsigned long
     for(i=0; i<nrSabloane; i++)
         //citesc calea sablonului
     {   printf("Introduceti calea sablonului %u:", i);
+        //scanf("%s", calefisier);
         fgets(calefisier, 220, stdin);
         calefisier[strlen(calefisier)-1]='\0';
         printf("Va rugam asteptati...\n");
         //efectuez operatia de template-matching, retinand detectiile
-        MatchSablon(calefisier,img,lungime,latime,i,&det,&nrDetectii);
+        matchSablon(calefisier,img,lungime,latime,i,&det,&nrDetectii);
     }
     //sortam descrescaor
     qsort(det, nrDetectii,sizeof(struct detectii),comparator);
 
     //eliminam non-maximele
     if(nrDetectii!=0)
-    EliminNonMaximele(det,&nrDetectii);
+    eliminNonMaximele(det,&nrDetectii);
+   
 
     //initializarea culorilor pentru fiecare sablon in parte
     struct pixel *culori=(struct pixel *)malloc(10*sizeof(struct pixel));
@@ -469,21 +476,21 @@ int main()
     unsigned long int lungime, latime,i,j;
 
     //citire header
-    citesc_header(fimagine,&header,&lungime,&latime);
+    citescHeader(fimagine,&header,&lungime,&latime);
     //alocam matricea imaginii
-    matrice_pixeli_neliniarizata(&img,lungime,latime);
+    matricePixeliNeliniarizata(&img,lungime,latime);
     //alocam copia
-    matrice_pixeli_neliniarizata(&imgnoua, lungime, latime);
+    matricePixeliNeliniarizata(&imgnoua, lungime, latime);
     //citim imaginea
-    citire_pixel(fimagine, img, lungime, latime);
+    citirePixel(fimagine, img, lungime, latime);
     //copiem imaginea
     for(i=0; i<lungime; i++)
         for(j=0; j<latime; j++)
             imgnoua[i][j]=img[i][j];
             //trecem in greyscale
-    greyscale(img, lungime, latime);
+    greyScale(img, lungime, latime);
     //operatia de template-mtching
-    Template_Matching(img,imgnoua,lungime,latime);
+    templateMatching(img,imgnoua,lungime,latime);
     //afisam imaginea peste imaginea de intrare
     afisare(calefisier,header,imgnoua, lungime, latime);
     free(img);
